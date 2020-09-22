@@ -1,0 +1,14 @@
+ext {
+    // Koin
+    koin_version = '2.1.0'
+
+    // Kotlin
+    kotlin_version = '1.4.10'
+
+    // Ktor
+    ktor_version = "1.4.0"
+
+    hikaricp_version = "3.4.5"
+
+    exposed_version = "0.26.2"
+}

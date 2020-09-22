@@ -1,0 +1,99 @@
+buildscript {
+    apply from: "versions.gradle"
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.koin:koin-gradle-plugin:$koin_version"
+        classpath "com.github.jengelman.gradle.plugins:shadow:4.0.3"
+    }
+}
+
+apply from: "versions.gradle"
+apply plugin: 'kotlin'
+apply plugin: 'application'
+apply plugin: 'koin'
+apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: 'application'
+
+group 'com.bpjamsostek.website'
+version '0.0.1'
+mainClassName = "io.ktor.server.netty.EngineMain"
+
+sourceSets {
+    main.kotlin.srcDirs = main.java.srcDirs = ['src']
+    test.kotlin.srcDirs = test.java.srcDirs = ['test']
+    main.resources.srcDirs = ['resources']
+    test.resources.srcDirs = ['testresources']
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven { url "https://dl.bintray.com/kotlin/kotlinx" }
+    maven { url "https://dl.bintray.com/kotlin/ktor" }
+}
+
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
+}
+
+sourceCompatibility = 1.8
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "io.ktor:ktor-server-netty:$ktor_version"
+    implementation "ch.qos.logback:logback-classic:$logback_version"
+    implementation "io.ktor:ktor-server-core:$ktor_version"
+    implementation "io.ktor:ktor-gson:$ktor_version"
+    implementation "io.ktor:ktor-client-core:$ktor_version"
+    implementation "io.ktor:ktor-client-core-jvm:$ktor_version"
+    implementation "io.ktor:ktor-client-jetty:$ktor_version"
+    testImplementation "io.ktor:ktor-server-tests:$ktor_version"
+
+    //koin
+    implementation "org.koin:koin-core:$koin_version"
+    implementation "org.koin:koin-ktor:$koin_version"
+    implementation "org.koin:koin-logger-slf4j:$koin_version"
+
+    //hikaricp
+    implementation "com.zaxxer:HikariCP:$hikaricp_version"
+
+    //exposed
+    implementation "org.jetbrains.exposed:exposed-core:$exposed_version"
+    implementation "org.jetbrains.exposed:exposed-jdbc:$exposed_version"
+    implementation "org.jetbrains.exposed:exposed-jodatime:$exposed_version"
+
+    //mysql connector
+    implementation "mysql:mysql-connector-java:8.0.21"
+
+    //rx java
+    implementation "io.reactivex.rxjava2:rxjava:2.2.18"
+
+    //redis
+    implementation "redis.clients:jedis:2.8.0"
+
+    //okhttp, retrofit
+    implementation "com.squareup.okhttp3:logging-interceptor:4.5.0"
+    implementation "com.squareup.retrofit2:retrofit:2.8.1"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:2.7.1"
+    implementation "com.squareup.retrofit2:converter-gson:2.7.1"
+}
+
+shadowJar {
+    baseName = 'website-backend'
+    classifier = null
+    version = null
+}
