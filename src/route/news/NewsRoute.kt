@@ -75,6 +75,60 @@ fun Route.newsRoute(){
     post("news"){
         val newsRequest = call.receive<InsertNewsRequest>()
         try {
+            if (newsRequest.title == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory title")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.keywords == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory keywords")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.descriptionContent == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory descriptionContennt")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.content == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory content")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.imageUrl == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory imageUrl")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.userRekam == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory userUbah")),
+                        ContentType.Application.Json)
+                )
+            }
+
             if (newsViewModel.insertNews(newsRequest)){
                 call.respond(
                     HttpStatusCode.OK,
@@ -99,6 +153,69 @@ fun Route.newsRoute(){
     put("news"){
         val newsRequest = call.receive<UpdateNewsRequest>()
         try {
+            if (newsRequest.id.toString() == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory id")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.title == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory title")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.keywords == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory keywords")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.descriptionContent == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory descriptionContennt")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.content == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory content")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.imageUrl == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory imageUrl")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.userUbah == ""){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory userUbah")),
+                        ContentType.Application.Json)
+                )
+            }
+
             if (newsViewModel.updateNews(newsRequest)){
                 call.respond(
                     HttpStatusCode.OK,

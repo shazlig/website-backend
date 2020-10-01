@@ -6,7 +6,6 @@ import data.news.db.NewsDatabase
 import data.news.db.NewsDatabaseImpl
 import domain.news.NewsInteractor
 import domain.news.NewsUseCase
-import org.koin.core.qualifier.StringQualifier
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import route.news.viewmodel.NewsViewModel

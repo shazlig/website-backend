@@ -71,11 +71,6 @@ dependencies {
     //hikaricp
     implementation "com.zaxxer:HikariCP:$hikaricp_version"
 
-    //exposed
-    implementation "org.jetbrains.exposed:exposed-core:$exposed_version"
-    implementation "org.jetbrains.exposed:exposed-jdbc:$exposed_version"
-    implementation "org.jetbrains.exposed:exposed-jodatime:$exposed_version"
-
     //mysql connector
     implementation "mysql:mysql-connector-java:8.0.21"
 
@@ -85,11 +80,6 @@ dependencies {
     //redis
     implementation "redis.clients:jedis:2.8.0"
 
-    //okhttp, retrofit
-    implementation "com.squareup.okhttp3:logging-interceptor:4.5.0"
-    implementation "com.squareup.retrofit2:retrofit:2.8.1"
-    implementation "com.squareup.retrofit2:adapter-rxjava2:2.7.1"
-    implementation "com.squareup.retrofit2:converter-gson:2.7.1"
 }
 
 shadowJar {
