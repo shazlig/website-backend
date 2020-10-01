@@ -16,13 +16,13 @@ class NewsDatabaseImpl(private val dataSource: HikariDataSource): NewsDatabase {
 
 
     override fun listNews(listNewsRequest: ListNewsRequest): Flowable<List<NewsItem>> {
-        var pageNumber: Int = if (listNewsRequest.pageNumber.equals("1")) {
+        val pageNumber: Int = if (listNewsRequest.pageNumber.equals("1")) {
             0
         } else {
             listNewsRequest.pageNumber?.toInt()?.minus(1) ?: 0
         }
 
-        var sql: String = if (!listNewsRequest.searchBy.isNullOrEmpty()) {
+        val sql: String = if (!listNewsRequest.searchBy.isNullOrEmpty()) {
             val searchBy = listNewsRequest.searchBy
             val searchValue = listNewsRequest.searchBy.toLowerCase()
             "select * from news where lower(${searchBy}) like %${searchValue}% order by id desc limit ${listNewsRequest.pageSize} offset $pageNumber"
@@ -31,7 +31,7 @@ class NewsDatabaseImpl(private val dataSource: HikariDataSource): NewsDatabase {
         }
 
         val connection : Connection = dataSource.connection
-        var result: MutableList<NewsItem> = arrayListOf()
+        val result: MutableList<NewsItem> = arrayListOf()
         return Flowable.fromCallable {
             try {
                 val preparedStatement: PreparedStatement = connection.prepareStatement(sql)
@@ -53,16 +53,16 @@ class NewsDatabaseImpl(private val dataSource: HikariDataSource): NewsDatabase {
                 connection.close()
                 result
             }catch (e: Exception){
+                println(e)
                 connection.close()
                 result
             }
         }
-
     }
 
     override fun getNews(newsId: Int): Single<NewsItem> {
         val connection : Connection = dataSource.connection
-        var result = NewsItem()
+        val result = NewsItem()
         return Single.fromCallable {
             try {
                 val preparedStatement: PreparedStatement = connection.prepareStatement("select * from news where id=?")
