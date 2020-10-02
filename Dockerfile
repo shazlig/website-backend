@@ -1,11 +1,3 @@
-FROM gradle:4.10 as builder
-
-COPY build.gradle .
-COPY src ./src
-
-RUN gradle clean build --no-daemon
-
-
 FROM openjdk:8-jre-alpine
 ENV APPLICATION_USER ktor
 RUN adduser -D -g '' $APPLICATION_USER

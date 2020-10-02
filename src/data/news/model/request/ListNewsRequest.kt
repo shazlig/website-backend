@@ -14,5 +14,8 @@ data class ListNewsRequest(
 	val pageSize: String? = null,
 
 	@field:SerializedName("searchValue")
-	val searchValue: String? = null
+	val searchValue: String? = null,
+
+	@field:SerializedName("langId")
+	val langId: String? = null
 )

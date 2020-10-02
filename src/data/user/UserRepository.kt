@@ -12,6 +12,8 @@ interface UserRepository {
 
     fun getUser(userId: Int): Single<UserItem>
 
+    fun getUserByEmail(email: String): Single<Boolean>
+
     fun insertUser(insertUserRequest: InsertUserRequest): Single<Boolean>
 
     fun updateUser(updateUserRequest: UpdateUserRequest): Single<Boolean>

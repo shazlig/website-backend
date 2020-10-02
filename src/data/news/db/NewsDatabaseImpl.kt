@@ -16,69 +16,84 @@ class NewsDatabaseImpl(private val dataSource: HikariDataSource): NewsDatabase {
 
 
     override fun listNews(listNewsRequest: ListNewsRequest): Flowable<List<NewsItem>> {
+        val connection : Connection = dataSource.connection
+        val result: MutableList<NewsItem> = arrayListOf()
         val pageNumber: Int = if (listNewsRequest.pageNumber.equals("1")) {
             0
         } else {
             listNewsRequest.pageNumber?.toInt()?.minus(1) ?: 0
         }
 
-        val sql: String = if (!listNewsRequest.searchBy.isNullOrEmpty()) {
+        val sql: String
+        val preparedStatement: PreparedStatement
+
+        if (!listNewsRequest.searchBy.isNullOrEmpty() && !listNewsRequest.searchValue.isNullOrEmpty() && !listNewsRequest.langId.isNullOrEmpty()){
             val searchBy = listNewsRequest.searchBy
-            val searchValue = listNewsRequest.searchBy.toLowerCase()
-            "select * from news where lower(${searchBy}) like %${searchValue}% order by id desc limit ${listNewsRequest.pageSize} offset $pageNumber"
-        } else {
-            "select * from news  order by id desc limit ${listNewsRequest.pageSize} offset $pageNumber"
+            val searchValue = listNewsRequest.searchValue.toLowerCase()
+            sql = "select * from news where lower(langId) = ? and lower(${searchBy}) like '%${searchValue}%' order by newsId desc limit ${listNewsRequest.pageSize} offset $pageNumber"
+            preparedStatement = connection.prepareStatement(sql)
+            preparedStatement.setString(1, listNewsRequest.langId)
+        }else{
+            sql = "select * from news where lower(langId) = ? order by newsId desc limit ${listNewsRequest.pageSize} offset $pageNumber"
+            preparedStatement = connection.prepareStatement(sql)
+            preparedStatement.setString(1, listNewsRequest.langId)
         }
 
-        val connection : Connection = dataSource.connection
-        val result: MutableList<NewsItem> = arrayListOf()
         return Flowable.fromCallable {
             try {
-                val preparedStatement: PreparedStatement = connection.prepareStatement(sql)
                 val resultSet = preparedStatement.executeQuery()
                 while(resultSet.next()){
                     result.add(
                         NewsItem(
-                            id = resultSet.getInt("id"),
-                            title = resultSet.getString("title"),
-                            keywords = resultSet.getString("keywords"),
-                            descriptionContent = resultSet.getString("descriptionContent"),
-                            content = resultSet.getString("content"),
-                            imageUrl = resultSet.getString("imageUrl"),
+                            newsId = resultSet.getInt("newsId"),
+                            newsCategoryId = resultSet.getInt("newsCategoryId"),
+                            newsTitle = resultSet.getString("newsTitle"),
+                            newsMetaData = resultSet.getString("newsMetaData"),
+                            newsShortContent = resultSet.getString("newsShortContent"),
+                            newsLongContent = resultSet.getString("newsLongContent"),
+                            newsAuthor = resultSet.getString("newsAuthor"),
                             slug = resultSet.getString("slug"),
+                            langId = resultSet.getString("langId"),
+                            active = resultSet.getString("active"),
+                            imagePathUrl = resultSet.getString("imagePathUrl"),
                             createdAt = resultSet.getString("createdAt"),
+                            userRekam = resultSet.getString("userRekam")
                         )
                     )
                 }
                 connection.close()
                 result
             }catch (e: Exception){
-                println(e)
                 connection.close()
                 result
             }
         }
     }
 
-    override fun getNews(newsId: Int): Single<NewsItem> {
+    override fun getNews(id: Int): Single<NewsItem> {
         val connection : Connection = dataSource.connection
-        val result = NewsItem()
+        var result = NewsItem()
         return Single.fromCallable {
             try {
-                val preparedStatement: PreparedStatement = connection.prepareStatement("select * from news where id=?")
-                preparedStatement.setInt(1, newsId)
+                val preparedStatement: PreparedStatement = connection.prepareStatement("select * from news where newsId=?")
+                preparedStatement.setInt(1, id)
                 val resultSet = preparedStatement.executeQuery()
                 if(resultSet.next()){
-                    with(result){
-                        id = resultSet.getInt("id")
-                        title = resultSet.getString("title")
-                        keywords = resultSet.getString("keywords")
-                        descriptionContent = resultSet.getString("descriptionContent")
-                        content = resultSet.getString("content")
-                        imageUrl = resultSet.getString("imageUrl")
-                        slug = resultSet.getString("slug")
-                        createdAt = resultSet.getString("createdAt")
-                    }
+                    result = NewsItem(
+                        newsId = resultSet.getInt("newsId"),
+                        newsCategoryId = resultSet.getInt("newsCategoryId"),
+                        newsTitle = resultSet.getString("newsTitle"),
+                        newsMetaData = resultSet.getString("newsMetaData"),
+                        newsShortContent = resultSet.getString("newsShortContent"),
+                        newsLongContent = resultSet.getString("newsLongContent"),
+                        newsAuthor = resultSet.getString("newsAuthor"),
+                        slug = resultSet.getString("slug"),
+                        langId = resultSet.getString("langId"),
+                        active = resultSet.getString("active"),
+                        imagePathUrl = resultSet.getString("imagePathUrl"),
+                        createdAt = resultSet.getString("createdAt"),
+                        userRekam = resultSet.getString("userRekam")
+                    )
                 }
                 connection.close()
                 result
@@ -93,14 +108,18 @@ class NewsDatabaseImpl(private val dataSource: HikariDataSource): NewsDatabase {
         val connection : Connection = dataSource.connection
         return Single.fromCallable {
             try {
-                val preparedStatement: PreparedStatement = connection.prepareStatement("insert into news(title, keywords, descriptionContent, content, imageUrl, slug, userRekam) values(?, ?, ?, ?, ?, ?, ?)")
-                preparedStatement.setString(1, insertNewsRequest.title)
-                preparedStatement.setString(2, insertNewsRequest.keywords)
-                preparedStatement.setString(3, insertNewsRequest.descriptionContent)
-                preparedStatement.setString(4, insertNewsRequest.content)
-                preparedStatement.setString(5, insertNewsRequest.imageUrl)
-                preparedStatement.setString(6, insertNewsRequest.title?.toSlug())
-                preparedStatement.setString(7, insertNewsRequest.userRekam)
+                val preparedStatement: PreparedStatement = connection.prepareStatement("insert into news(newsCategoryId, newsTitle, newsMetaData, newsShortContent, newsLongContent, newsAuthor, imagePathUrl, slug, langId, status, userRekam) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                preparedStatement.setString(1, insertNewsRequest.newsCategoryId)
+                preparedStatement.setString(2, insertNewsRequest.newsTitle)
+                preparedStatement.setString(3, insertNewsRequest.newsMetaData)
+                preparedStatement.setString(4, insertNewsRequest.newsShortContent)
+                preparedStatement.setString(5, insertNewsRequest.newsLongContent)
+                preparedStatement.setString(6, insertNewsRequest.newsAuthor)
+                preparedStatement.setString(7, insertNewsRequest.imagePathUrl)
+                preparedStatement.setString(8, insertNewsRequest.newsTitle?.toSlug())
+                preparedStatement.setString(9, insertNewsRequest.langId)
+                preparedStatement.setString(10, insertNewsRequest.active)
+                preparedStatement.setString(11, insertNewsRequest.userRekam)
                 preparedStatement.execute()
                 connection.close()
                 true
@@ -115,15 +134,19 @@ class NewsDatabaseImpl(private val dataSource: HikariDataSource): NewsDatabase {
         val connection : Connection = dataSource.connection
         return Single.fromCallable {
             try {
-                val preparedStatement: PreparedStatement = connection.prepareStatement("update news set title=?, keywords=?, descriptionContent=?, content=?, imageUrl=?, slug=?, userUbah=?, updatedAt=sysdate() where id=?")
-                preparedStatement.setString(1, updateNewsRequest.title)
-                preparedStatement.setString(2, updateNewsRequest.keywords)
-                preparedStatement.setString(3, updateNewsRequest.descriptionContent)
-                preparedStatement.setString(4, updateNewsRequest.content)
-                preparedStatement.setString(5, updateNewsRequest.imageUrl)
-                preparedStatement.setString(6, updateNewsRequest.title?.toSlug())
-                preparedStatement.setString(7, updateNewsRequest.userUbah)
-                preparedStatement.setInt(8, updateNewsRequest.id)
+                val preparedStatement: PreparedStatement = connection.prepareStatement("update news set newsCategoryId = ?, newsTitle=?, newsMetaData=?, newsShortContent=?, newsLongContent=?, newsAuthor=?, imagePathUrl=?, slug=?, langId=?, status=?,  updatedAt=sysdate(), userUbah=? where newsId=?")
+                preparedStatement.setString(1, updateNewsRequest.newsCategoryId)
+                preparedStatement.setString(2, updateNewsRequest.newsTitle)
+                preparedStatement.setString(3, updateNewsRequest.newsMetaData)
+                preparedStatement.setString(4, updateNewsRequest.newsShortContent)
+                preparedStatement.setString(5, updateNewsRequest.newsLongContent)
+                preparedStatement.setString(6, updateNewsRequest.newsAuthor)
+                preparedStatement.setString(7, updateNewsRequest.imagePathUrl)
+                preparedStatement.setString(8, updateNewsRequest.newsTitle?.toSlug())
+                preparedStatement.setString(9, updateNewsRequest.langId)
+                preparedStatement.setString(10, updateNewsRequest.active)
+                preparedStatement.setString(11, updateNewsRequest.userUbah)
+                updateNewsRequest.newsId?.let { preparedStatement.setInt(12, it) }
                 preparedStatement.execute()
                 connection.close()
                 true
@@ -134,12 +157,12 @@ class NewsDatabaseImpl(private val dataSource: HikariDataSource): NewsDatabase {
         }
     }
 
-    override fun deleteNews(newsId: Int): Single<Boolean> {
+    override fun deleteNews(id: Int): Single<Boolean> {
         val connection : Connection = dataSource.connection
         return Single.fromCallable {
             try {
-                val preparedStatement: PreparedStatement = connection.prepareStatement("delete from news where id = ?")
-                preparedStatement.setInt(1, newsId)
+                val preparedStatement: PreparedStatement = connection.prepareStatement("delete from news where newsId = ?")
+                preparedStatement.setInt(1, id)
                 preparedStatement.execute()
                 connection.close()
                 true

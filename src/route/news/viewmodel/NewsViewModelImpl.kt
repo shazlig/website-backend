@@ -43,7 +43,7 @@ class NewsViewModelImpl(
                 result = it
             }, {
                 println(it)
-            })
+            }).addTo(compositeDisposable)
         return result
     }
 
@@ -54,7 +54,7 @@ class NewsViewModelImpl(
                 result = it
             }, {
                 println(it)
-            })
+            }).addTo(compositeDisposable)
         return result
     }
 
@@ -65,7 +65,7 @@ class NewsViewModelImpl(
                 result = it
             }, {
                 println(it)
-            })
+            }).addTo(compositeDisposable)
         return result
     }
 

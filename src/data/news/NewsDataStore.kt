@@ -1,14 +1,9 @@
 package data.news
 
-import data.news.db.NewsDatabase
-import data.news.model.NewsItem
-import data.news.model.request.ListNewsRequest
-import data.news.model.request.InsertNewsRequest
-import data.news.model.request.UpdateNewsRequest
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Observable
-import io.reactivex.Single
+import data.news.db.*
+import data.news.model.*
+import data.news.model.request.*
+import io.reactivex.*
 
 
 class NewsDataStore(private val  newsDatabase: NewsDatabase):NewsRepository {

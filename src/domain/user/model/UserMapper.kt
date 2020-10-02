@@ -4,9 +4,12 @@ import data.user.model.UserItem
 
 fun UserItem.toObject(): User {
     return User(
-        id = id,
-        email = email,
-        password = password,
-        createdAt = createdAt
+        userId = userId,
+        username = username.orEmpty(),
+        password = password.orEmpty(),
+        fullName = fullName.orEmpty(),
+        userType = userType.orEmpty(),
+        active = active.orEmpty(),
+        createdAt = createdAt.orEmpty()
     )
 }

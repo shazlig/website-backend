@@ -2,24 +2,35 @@ package data.news.model.request
 
 import com.google.gson.annotations.SerializedName
 
-class InsertNewsRequest {
+data class InsertNewsRequest(
 
-    @SerializedName("title")
-    val title: String? = null
+	@field:SerializedName("newsLongContent")
+	val newsLongContent: String? = null,
 
-    @SerializedName("keywords")
-    val keywords: String? = null
+	@field:SerializedName("newsAuthor")
+	val newsAuthor: String? = null,
 
-    @SerializedName("descriptionContent")
-    val descriptionContent: String? = null
+	@field:SerializedName("newsTitle")
+	val newsTitle: String? = null,
 
-    @SerializedName("content")
-    val content: String? = null
+	@field:SerializedName("userRekam")
+	val userRekam: String? = null,
 
-    @SerializedName("imageUrl")
-    val imageUrl: String? = null
+	@field:SerializedName("newsMetaData")
+	val newsMetaData: String? = null,
 
-    @SerializedName("userRekam")
-    val userRekam: String? = null
+	@field:SerializedName("newsCategoryId")
+	val newsCategoryId: String? = null,
 
-}
+	@field:SerializedName("langId")
+	val langId: String? = null,
+
+	@field:SerializedName("newsShortContent")
+	val newsShortContent: String? = null,
+
+	@field:SerializedName("active")
+	val active: String? = null,
+
+	@field:SerializedName("imagePathUrl")
+	val imagePathUrl: String? = null
+)

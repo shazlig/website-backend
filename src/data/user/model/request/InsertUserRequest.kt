@@ -10,6 +10,15 @@ data class InsertUserRequest(
 	@field:SerializedName("userRekam")
 	val userRekam: String? = null,
 
-	@field:SerializedName("email")
-	val email: String? = null
+	@field:SerializedName("fullName")
+	val fullName: String? = null,
+
+	@field:SerializedName("active")
+	val active: String? = null,
+
+	@field:SerializedName("userType")
+	val userType: String? = null,
+
+	@field:SerializedName("username")
+	val username: String? = null
 )

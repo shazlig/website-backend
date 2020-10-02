@@ -13,6 +13,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import org.koin.ktor.ext.inject
 import route.user.viewmodel.UserViewModel
+import utils.isValidPassword
 
 fun Route.userRoute(){
 
@@ -25,15 +26,16 @@ fun Route.userRoute(){
         try {
             val userId : Int = call.parameters["id"]?.toInt() ?: 0
             val result = userViewModel.getUser(userId)
-            if (result.id == 0) {
+            if (result.userId == 0) {
                 call.respond(
                     HttpStatusCode.NotFound,
                     TextContent(
                         Gson().toJson(errorMessage.copy(statusCode = "404", message = "Data tidak ditemukan")),
                         ContentType.Application.Json)
                 )
+            }else{
+                call.respond(HttpStatusCode.OK, userViewModel.getUser(userId))
             }
-            call.respond(HttpStatusCode.OK, userViewModel.getUser(userId))
         }catch (e: Exception){
             errorMessage.copy(statusCode = "400", message = e.message.toString())
             call.respond(HttpStatusCode.InternalServerError, Gson().toJson(errorMessage))
@@ -44,7 +46,7 @@ fun Route.userRoute(){
         val userRequest = call.receive<ListUserRequest>()
         try {
             if (userRequest.pageNumber.isNullOrEmpty()){
-                call.respond(
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
                         Gson().toJson(errorMessage.copy(statusCode = "400", message = "Mandatory: pageNumber")),
@@ -53,7 +55,7 @@ fun Route.userRoute(){
             }
 
             if (userRequest.pageSize.isNullOrEmpty()){
-                call.respond(
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
                         Gson().toJson(errorMessage.copy(statusCode = "400", message = "Mandatory: pageSize")),
@@ -81,8 +83,8 @@ fun Route.userRoute(){
     post("user"){
         val userRequest = call.receive<InsertUserRequest>()
         try {
-            if (userRequest.email == ""){
-                call.respond(
+            if (userRequest.username.isNullOrEmpty()){
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
                         Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory email")),
@@ -90,8 +92,8 @@ fun Route.userRoute(){
                 )
             }
 
-            if (userRequest.password == ""){
-                call.respond(
+            if (userRequest.password.isNullOrEmpty()){
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
                         Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory password")),
@@ -99,8 +101,26 @@ fun Route.userRoute(){
                 )
             }
 
-            if (userRequest.userRekam == ""){
-                call.respond(
+            if (userRequest.userType.isNullOrEmpty()){
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory userType")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (userRequest.fullName.isNullOrEmpty()){
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory fullName")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (userRequest.userRekam.isNullOrEmpty()){
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
                         Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory userRekam")),
@@ -108,8 +128,26 @@ fun Route.userRoute(){
                 )
             }
 
+            if (userRequest.active.isNullOrEmpty()){
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory active")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if(!isValidPassword(userRequest.password)){
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Kata sandi harus terdapat kombinasi huruf kapital, angka, simbol, dan minimal 8 karakter")),
+                        ContentType.Application.Json)
+                )
+            }
+
             if (userViewModel.insertUser(userRequest)){
-                call.respond(
+                return@post call.respond(
                     HttpStatusCode.OK,
                     TextContent(
                         Gson().toJson(resultMessage.copy(statusCode = "200", message = "Success")),
@@ -119,7 +157,7 @@ fun Route.userRoute(){
                 call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Failed to insert data")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Gagal tambah user pastikan data benar dan email belum pernah digunakan")),
                         ContentType.Application.Json)
                 )
             }
@@ -132,8 +170,8 @@ fun Route.userRoute(){
     put("user"){
         val userRequest = call.receive<UpdateUserRequest>()
         try {
-            if (userRequest.id.toString() == ""){
-                call.respond(
+            if (userRequest.userId.toString().isNullOrEmpty()){
+                return@put call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
                         Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory id")),
@@ -141,8 +179,8 @@ fun Route.userRoute(){
                 )
             }
 
-            if (userRequest.email == ""){
-                call.respond(
+            if (userRequest.username.isNullOrEmpty()){
+                return@put call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
                         Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory email")),
@@ -150,8 +188,8 @@ fun Route.userRoute(){
                 )
             }
 
-            if (userRequest.password == ""){
-                call.respond(
+            if (userRequest.password.isNullOrEmpty()){
+                return@put call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
                         Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory password")),
@@ -159,17 +197,54 @@ fun Route.userRoute(){
                 )
             }
 
-            if (userRequest.userUbah == ""){
-                call.respond(
+            if (userRequest.userType.isNullOrEmpty()){
+                return@put call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory userRekam")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory userType")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (userRequest.fullName.isNullOrEmpty()){
+                return@put call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory fullName")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (userRequest.userUbah.isNullOrEmpty()){
+                return@put call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory userUbah")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (userRequest.active.isNullOrEmpty()){
+                return@put call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory active")),
+                        ContentType.Application.Json)
+                )
+            }
+
+
+            if(!isValidPassword(userRequest.password)){
+                return@put call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Kata sandi harus terdapat kombinasi huruf kapital, angka, simbol, dan minimal 8 karakter")),
                         ContentType.Application.Json)
                 )
             }
 
             if (userViewModel.updateUser(userRequest)){
-                call.respond(
+                return@put call.respond(
                     HttpStatusCode.OK,
                     TextContent(
                         Gson().toJson(resultMessage.copy(statusCode = "200", message = "Success")),

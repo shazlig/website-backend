@@ -1,7 +1,6 @@
 package data.user.db
 
 import com.zaxxer.hikari.HikariDataSource
-import data.news.model.request.UpdateNewsRequest
 import data.user.model.UserItem
 import data.user.model.request.InsertUserRequest
 import data.user.model.request.ListUserRequest
@@ -23,9 +22,9 @@ class UserDatabaseImpl(private val dataSource: HikariDataSource): UserDatabase {
         val sql: String = if (!listUserRequest.searchBy.isNullOrEmpty()) {
             val searchBy = listUserRequest.searchBy
             val searchValue = listUserRequest.searchBy.toLowerCase()
-            "select * from users where lower(${searchBy}) like %${searchValue}% order by id desc limit ${listUserRequest.pageSize} offset $pageNumber"
+            "select * from users where lower(${searchBy}) like %${searchValue}% order by userId desc limit ${listUserRequest.pageSize} offset $pageNumber"
         } else {
-            "select * from users  order by id desc limit ${listUserRequest.pageSize} offset $pageNumber"
+            "select * from users  order by userId desc limit ${listUserRequest.pageSize} offset $pageNumber"
         }
 
         val connection : Connection = dataSource.connection
@@ -37,11 +36,45 @@ class UserDatabaseImpl(private val dataSource: HikariDataSource): UserDatabase {
                 while(resultSet.next()){
                     result.add(
                         UserItem(
-                            id = resultSet.getInt("id"),
-                            email = resultSet.getString("email"),
+                            userId = resultSet.getInt("userId"),
+                            username = resultSet.getString("username"),
                             password = resultSet.getString("password"),
+                            fullName = resultSet.getString("fullName"),
+                            userType = resultSet.getString("userType"),
+                            active = resultSet.getString("active"),
+                            userRekam = resultSet.getString("userRekam"),
                             createdAt = resultSet.getString("createdAt")
                         )
+                    )
+                }
+                connection.close()
+                println(result)
+                result
+            }catch (e: Exception){
+                connection.close()
+                result
+            }
+        }
+    }
+
+    override fun getUser(id: Int): Single<UserItem> {
+        val connection : Connection = dataSource.connection
+        var result = UserItem()
+        return Single.fromCallable {
+            try {
+                val preparedStatement: PreparedStatement = connection.prepareStatement("select * from users where userId=?")
+                preparedStatement.setInt(1, id)
+                val resultSet = preparedStatement.executeQuery()
+                if(resultSet.next()){
+                    result = UserItem(
+                        userId = resultSet.getInt("userId"),
+                        username = resultSet.getString("username"),
+                        password = resultSet.getString("password"),
+                        fullName = resultSet.getString("fullName"),
+                        userType = resultSet.getString("userType"),
+                        active = resultSet.getString("active"),
+                        userRekam = resultSet.getString("userRekam"),
+                        createdAt = resultSet.getString("createdAt")
                     )
                 }
                 connection.close()
@@ -53,22 +86,16 @@ class UserDatabaseImpl(private val dataSource: HikariDataSource): UserDatabase {
         }
     }
 
-    override fun getUser(userId: Int): Single<UserItem> {
+    override fun getUserByEmail(email: String): Single<Boolean> {
         val connection : Connection = dataSource.connection
-        val result = UserItem()
+        var result = false
         return Single.fromCallable {
             try {
-                val preparedStatement: PreparedStatement = connection.prepareStatement("select * from users where id=?")
-                preparedStatement.setInt(1, userId)
+                val preparedStatement: PreparedStatement = connection.prepareStatement("select count(1) rowCount from users where username=?")
+                preparedStatement.setString(1, email)
                 val resultSet = preparedStatement.executeQuery()
-                if(resultSet.next()){
-                    with(result){
-                        id = resultSet.getInt("id")
-                        email = resultSet.getString("email")
-                        password = resultSet.getString("password")
-                        createdAt = resultSet.getString("createdAt")
-                    }
-                }
+                resultSet.next()
+                result = resultSet.getInt("rowCount") > 0
                 connection.close()
                 result
             }catch (e: Exception){
@@ -82,10 +109,13 @@ class UserDatabaseImpl(private val dataSource: HikariDataSource): UserDatabase {
         val connection : Connection = dataSource.connection
         return Single.fromCallable {
             try {
-                val preparedStatement: PreparedStatement = connection.prepareStatement("insert into users(email, password, userRekam) values(?, ?, ?)")
-                preparedStatement.setString(1, insertUserRequest.email)
+                val preparedStatement: PreparedStatement = connection.prepareStatement("insert into users(username, password, userType, fullName, userRekam, active) values(?, ?, ?, ?, ?, ?)")
+                preparedStatement.setString(1, insertUserRequest.username)
                 preparedStatement.setString(2, insertUserRequest.password)
-                preparedStatement.setString(3, insertUserRequest.userRekam)
+                preparedStatement.setString(3, insertUserRequest.userType)
+                preparedStatement.setString(4, insertUserRequest.fullName)
+                preparedStatement.setString(5, insertUserRequest.userRekam)
+                preparedStatement.setString(6, insertUserRequest.active)
                 preparedStatement.execute()
                 connection.close()
                 true
@@ -100,11 +130,13 @@ class UserDatabaseImpl(private val dataSource: HikariDataSource): UserDatabase {
         val connection : Connection = dataSource.connection
         return Single.fromCallable {
             try {
-                val preparedStatement: PreparedStatement = connection.prepareStatement("update users set email=?, password=?, userUbah=? where userId=?")
-                preparedStatement.setString(1, updateUserRequest.email)
+                val preparedStatement: PreparedStatement = connection.prepareStatement("update users set username=?, password=?, userType=?, fullName=?, userUbah=? where userId=?")
+                preparedStatement.setString(1, updateUserRequest.username)
                 preparedStatement.setString(2, updateUserRequest.password)
-                preparedStatement.setString(3, updateUserRequest.userUbah)
-                updateUserRequest.id?.let { preparedStatement.setInt(4, it) }
+                preparedStatement.setString(3, updateUserRequest.userType)
+                preparedStatement.setString(4, updateUserRequest.fullName)
+                preparedStatement.setString(5, updateUserRequest.userUbah)
+                updateUserRequest.userId?.let { preparedStatement.setInt(6, it) }
                 preparedStatement.execute()
                 connection.close()
                 true
@@ -115,12 +147,12 @@ class UserDatabaseImpl(private val dataSource: HikariDataSource): UserDatabase {
         }
     }
 
-    override fun deleteUser(userId: Int): Single<Boolean> {
+    override fun deleteUser(id: Int): Single<Boolean> {
         val connection : Connection = dataSource.connection
         return Single.fromCallable {
             try {
-                val preparedStatement: PreparedStatement = connection.prepareStatement("delete from users where id = ?")
-                preparedStatement.setInt(1, userId)
+                val preparedStatement: PreparedStatement = connection.prepareStatement("delete from users where userId = ?")
+                preparedStatement.setInt(1, id)
                 preparedStatement.execute()
                 connection.close()
                 true

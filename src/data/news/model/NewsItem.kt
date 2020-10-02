@@ -1,15 +1,18 @@
 package data.news.model
 
 data class NewsItem(
-    var id: Int = 0,
-    var title: String = "",
-    var keywords: String= "",
-    var descriptionContent: String= "",
-    var content: String= "",
-    var imageUrl: String= "",
-    var slug: String= "",
-    var createdAt: String= "",
-    var updatedAt: String= "",
-    var userRekam: String= "",
-    var userUbah: String= ""
+	var newsLongContent: String? = null,
+	var createdAt: String? = null,
+	var newsId: Int? = 0,
+	var newsAuthor: String? = null,
+	var newsTitle: String? = null,
+	var userRekam: String? = null,
+	var newsMetaData: String? = null,
+	var newsCategoryId: Int? = 0,
+	var langId: String? = null,
+	var newsShortContent: String? = null,
+	var slug: String? = null,
+	var imagePathUrl: String? = null,
+	var active: String? = null
 )
+

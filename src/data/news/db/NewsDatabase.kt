@@ -13,12 +13,12 @@ interface NewsDatabase {
 
     fun listNews(listNewsRequest: ListNewsRequest): Flowable<List<NewsItem>>
 
-    fun getNews(newsId: Int): Single<NewsItem>
+    fun getNews(id: Int): Single<NewsItem>
 
     fun insertNews(insertNewsRequest: InsertNewsRequest): Single<Boolean>
 
     fun updateNews(updateNewsRequest: UpdateNewsRequest): Single<Boolean>
 
-    fun deleteNews(newsId: Int): Single<Boolean>
+    fun deleteNews(id: Int): Single<Boolean>
 
 }

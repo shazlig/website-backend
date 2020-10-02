@@ -22,6 +22,12 @@ class UserDataStore(private val userDatabase: UserDatabase): UserRepository {
         }
     }
 
+    override fun getUserByEmail(email: String): Single<Boolean> {
+        return userDatabase.getUserByEmail(email).map {
+            it
+        }
+    }
+
     override fun insertUser(insertUserRequest: InsertUserRequest): Single<Boolean> {
         return userDatabase.insertUser(insertUserRequest).map {
             it

@@ -1,8 +1,8 @@
 package route.news
 
 import com.google.gson.Gson
-import data.news.model.request.ListNewsRequest
 import data.news.model.request.InsertNewsRequest
+import data.news.model.request.ListNewsRequest
 import data.news.model.request.UpdateNewsRequest
 import domain.general.model.GeneralMessage
 import io.ktor.application.*
@@ -26,17 +26,18 @@ fun Route.newsRoute(){
         try {
             val newsId : Int = call.parameters["id"]?.toInt() ?: 0
             val result = newsViewModel.getNews(newsId)
-            if (result.id == 0) {
+            if (result.newsId == 0) {
                 call.respond(
                     HttpStatusCode.NotFound,
                     TextContent(
                         Gson().toJson(errorMessage.copy(statusCode = "404", message = "Data tidak ditemukan")),
                         ContentType.Application.Json)
                 )
+            }else{
+                call.respond(HttpStatusCode.OK, result)
             }
-            call.respond(HttpStatusCode.OK, newsViewModel.getNews(newsId))
         }catch (e: Exception){
-            errorMessage.copy(statusCode = "400", message = e.message.toString())
+            println(e)
             call.respond(HttpStatusCode.InternalServerError, Gson().toJson(errorMessage))
         }
     }
@@ -45,7 +46,7 @@ fun Route.newsRoute(){
         val newsRequest = call.receive<ListNewsRequest>()
         try {
             if (newsRequest.pageNumber.isNullOrEmpty()){
-                call.respond(
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
                         Gson().toJson(errorMessage.copy(statusCode = "400", message = "Mandatory: pageNumber")),
@@ -54,7 +55,7 @@ fun Route.newsRoute(){
             }
 
             if (newsRequest.pageSize.isNullOrEmpty()){
-                call.respond(
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
                         Gson().toJson(errorMessage.copy(statusCode = "400", message = "Mandatory: pageSize")),
@@ -63,7 +64,7 @@ fun Route.newsRoute(){
             }
             val result = newsViewModel.listNews(newsRequest)
             if (result.isEmpty()) {
-                call.respond(
+                return@post call.respond(
                     HttpStatusCode.NotFound,
                     TextContent(
                         Gson().toJson(errorMessage.copy(statusCode = "404", message = "Data tidak ditemukan")),
@@ -82,53 +83,80 @@ fun Route.newsRoute(){
     post("news"){
         val newsRequest = call.receive<InsertNewsRequest>()
         try {
-            if (newsRequest.title == ""){
-                call.respond(
+            if (newsRequest.newsCategoryId == ""){
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory title")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsCategoryId")),
                         ContentType.Application.Json)
                 )
             }
 
-            if (newsRequest.keywords == ""){
-                call.respond(
+            if (newsRequest.newsTitle == ""){
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory keywords")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsTitle")),
                         ContentType.Application.Json)
                 )
             }
 
-            if (newsRequest.descriptionContent == ""){
-                call.respond(
+            if (newsRequest.newsMetaData == ""){
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory descriptionContennt")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsMetaData")),
                         ContentType.Application.Json)
                 )
             }
 
-            if (newsRequest.content == ""){
-                call.respond(
+            if (newsRequest.newsShortContent == ""){
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory content")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsShortContent")),
                         ContentType.Application.Json)
                 )
             }
 
-            if (newsRequest.imageUrl == ""){
-                call.respond(
+            if (newsRequest.newsLongContent == ""){
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory imageUrl")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsLongContent")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.newsAuthor == ""){
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsAuthor")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.langId == ""){
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory langId")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.active == ""){
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory status")),
                         ContentType.Application.Json)
                 )
             }
 
             if (newsRequest.userRekam == ""){
-                call.respond(
+                return@post call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
                         Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory userUbah")),
@@ -136,8 +164,17 @@ fun Route.newsRoute(){
                 )
             }
 
+            if (newsRequest.imagePathUrl == ""){
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory imagePathUrl")),
+                        ContentType.Application.Json)
+                )
+            }
+
             if (newsViewModel.insertNews(newsRequest)){
-                call.respond(
+                return@post call.respond(
                     HttpStatusCode.OK,
                     TextContent(
                         Gson().toJson(resultMessage.copy(statusCode = "200", message = "Success")),
@@ -160,65 +197,101 @@ fun Route.newsRoute(){
     put("news"){
         val newsRequest = call.receive<UpdateNewsRequest>()
         try {
-            if (newsRequest.id.toString() == ""){
-                call.respond(
+            if (newsRequest.newsId.toString() == ""){
+                return@put call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory id")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsId")),
                         ContentType.Application.Json)
                 )
             }
 
-            if (newsRequest.title == ""){
-                call.respond(
+            if (newsRequest.newsCategoryId == ""){
+                return@put call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory title")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsCategoryId")),
                         ContentType.Application.Json)
                 )
             }
 
-            if (newsRequest.keywords == ""){
-                call.respond(
+            if (newsRequest.newsTitle == ""){
+                return@put call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory keywords")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsTitle")),
                         ContentType.Application.Json)
                 )
             }
 
-            if (newsRequest.descriptionContent == ""){
-                call.respond(
+            if (newsRequest.newsMetaData == ""){
+                return@put call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory descriptionContennt")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsMetaData")),
                         ContentType.Application.Json)
                 )
             }
 
-            if (newsRequest.content == ""){
-                call.respond(
+            if (newsRequest.newsShortContent == ""){
+                return@put call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory content")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsShortContent")),
                         ContentType.Application.Json)
                 )
             }
 
-            if (newsRequest.imageUrl == ""){
-                call.respond(
+            if (newsRequest.newsLongContent == ""){
+                return@put call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
-                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory imageUrl")),
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsLongContent")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.newsAuthor == ""){
+                return@put call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory newsAuthor")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.langId == ""){
+                return@put call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory langId")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.active == ""){
+                return@put call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory status")),
                         ContentType.Application.Json)
                 )
             }
 
             if (newsRequest.userUbah == ""){
-                call.respond(
+                return@put call.respond(
                     HttpStatusCode.BadRequest,
                     TextContent(
                         Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory userUbah")),
+                        ContentType.Application.Json)
+                )
+            }
+
+            if (newsRequest.imagePathUrl == ""){
+                return@put call.respond(
+                    HttpStatusCode.BadRequest,
+                    TextContent(
+                        Gson().toJson(resultMessage.copy(statusCode = "400", message = "Mandatory imagePathUrl")),
                         ContentType.Application.Json)
                 )
             }

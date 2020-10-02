@@ -80,6 +80,9 @@ dependencies {
     //redis
     implementation "redis.clients:jedis:2.8.0"
 
+    //swagger ui
+    //implementation 'de.nielsfalk.ktor:ktor-swagger:0.5.0'
+
 }
 
 shadowJar {

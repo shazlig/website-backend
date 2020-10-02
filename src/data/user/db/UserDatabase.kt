@@ -12,12 +12,14 @@ interface UserDatabase {
 
     fun listUser(listUserRequest: ListUserRequest): Flowable<List<UserItem>>
 
-    fun getUser(userId: Int): Single<UserItem>
+    fun getUser(id: Int): Single<UserItem>
+
+    fun getUserByEmail(email: String): Single<Boolean>
 
     fun insertUser(insertUserRequest: InsertUserRequest): Single<Boolean>
 
     fun updateUser(updateUserRequest: UpdateUserRequest): Single<Boolean>
 
-    fun deleteUser(userId: Int): Single<Boolean>
+    fun deleteUser(id: Int): Single<Boolean>
 
 }
