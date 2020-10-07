@@ -10,8 +10,8 @@ object MysqlClientDb {
 
         with(config){
            jdbcUrl = "jdbc:mysql://host:port/dbname?useUnicode=true&serverTimezone=Asia/Jakarta"
-           username = "root"
-           password = "welcome1"
+           username = "username"
+           password = "password"
            driverClassName = "com.mysql.cj.jdbc.Driver"
            isAutoCommit = true
            poolName = "website_new"
