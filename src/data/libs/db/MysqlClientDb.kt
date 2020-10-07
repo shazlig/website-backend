@@ -9,7 +9,7 @@ object MysqlClientDb {
         val config = HikariConfig()
 
         with(config){
-           jdbcUrl = "jdbc:mysql://172.28.208.22:3306/website_new?useUnicode=true&serverTimezone=Asia/Jakarta"
+           jdbcUrl = "jdbc:mysql://host:port/dbname?useUnicode=true&serverTimezone=Asia/Jakarta"
            username = "root"
            password = "welcome1"
            driverClassName = "com.mysql.cj.jdbc.Driver"
