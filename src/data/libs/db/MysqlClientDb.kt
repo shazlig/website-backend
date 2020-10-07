@@ -9,9 +9,9 @@ object MysqlClientDb {
         val config = HikariConfig()
 
         with(config){
-           jdbcUrl = "jdbc:mysql://host:port/dbname?useUnicode=true&serverTimezone=Asia/Jakarta"
-           username = "username"
-           password = "password"
+           jdbcUrl = System.getenv("WEBSITE_DB_JDBCURL")
+           username = System.getenv("WEBSITE_DB_USERNAME")
+           password = System.getenv("WEBSITE_DB_PASSWORD")
            driverClassName = "com.mysql.cj.jdbc.Driver"
            isAutoCommit = true
            poolName = "website_new"

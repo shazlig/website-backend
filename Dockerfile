@@ -25,6 +25,10 @@ RUN chmod -R 755 /app
 # Setting user to use when running the image 
 USER $APPLICATION_USER
 
+ENV WEBSITE_DB_JDBCURL="jdbc:mysql://host:port/dbname?useUnicode=true&serverTimezone=Asia/Jakarta"
+ENV WEBSITE_DB_USERNAME="username"
+ENV WEBSITE_DB_PASSWORD="password"
+
 # Copying needed files
 COPY --from=build /appbuild/build/libs/website-backend.jar /app/website-backend.jar
 COPY --from=build /appbuild/resources/ /app/resources/
